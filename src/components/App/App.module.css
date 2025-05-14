@@ -1,34 +1,31 @@
-.wrapper {
-    padding: 0 16px;
-    max-width: 1440px;
-    margin: 0 auto;
+.app {
+    width: 90%;
+    max-width: 1280px;
+    margin: 0px auto;
+    padding: 0 16px 16px;
 }
 
-.pagination {
+.toolbar {
+    margin-bottom: 16px;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    padding: 20px 0;
-    list-style: none;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
 }
 
-.pagination li {
-    cursor: pointer;
-    padding: 8px 12px;
-    background-color: #333;
-    border-radius: 4px;
+.button {
+    padding: 6px 12px;
+    font-size: 16px;
     color: #fff;
-    font-weight: bold;
-    transition: background-color 0.2s;
+    background-color: #0d6efd;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-.pagination li:hover {
-    background-color: #555;
-}
-
-.pagination .selected,
-.pagination .active {
-    background-color: #fab906;
-    color: #000;
+.button:hover {
+    background-color: #0b5ed7;
 }
