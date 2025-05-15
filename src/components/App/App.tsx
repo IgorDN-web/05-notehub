@@ -1,25 +1,76 @@
-import { useState } from 'react';
-import css from './App.module.css';
-import SearchBox from '../SearchBox/SearchBar';
-import Pagination from '../Pagination/Pagination';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchNotes, createNote, deleteNote } from '../../services/noteService';
+import { Note } from '../../types/note';
 import NoteList from '../NoteList/NoteList';
 import NoteModal from '../NoteModal/NoteModal';
+import Pagination from '../Pagination/Pagination';
+import SearchBox from '../SearchBox/SearchBox';
+import css from './App.module.css';
 
-const App = () => {
-  const [showModal, setShowModal] = useState(false);
+const PER_PAGE = 12;
+
+const App: React.FC = () => {
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['notes', page, searchTerm],
+    queryFn: () => fetchNotes({ page, perPage: PER_PAGE, search: searchTerm }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['notes']);
+      setIsModalOpen(false);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['notes']);
+    },
+  });
+
+  const handleCreateNote = (note: { title: string; content?: string; tag: Note['tag'] }) => {
+    createMutation.mutate(note);
+  };
+
+  const handleDeleteNote = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this note?')) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox />
-        <Pagination />
-        <button className={css.button} onClick={() => setShowModal(true)}>
+        <SearchBox value={searchTerm} onChange={setSearchTerm} />
+        <Pagination pageCount={totalPages} currentPage={page} onPageChange={setPage} />
+        <button className={css.button} onClick={() => setIsModalOpen(true)}>
           Create note +
         </button>
       </header>
 
-      <NoteList />
-      {showModal && <NoteModal onClose={() => setShowModal(false)} />}
+      {isLoading && <p>Loading notes...</p>}
+      {isError && <p>Error: {(error as Error).message}</p>}
+
+      {data && data.notes.length > 0 && (
+        <NoteList notes={data.notes} onDeleteNote={handleDeleteNote} />
+      )}
+
+      {isModalOpen && (
+        <NoteModal onClose={() => setIsModalOpen(false)} onCreateNote={handleCreateNote} />
+      )}
     </div>
   );
 };
