@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import css from './SearchBox.module.css';
-import { useDebounce } from 'use-debounce';
 
 interface SearchBoxProps {
   value: string;
@@ -8,19 +7,8 @@ interface SearchBoxProps {
 }
 
 const SearchBox: React.FC<SearchBoxProps> = ({ value, onChange }) => {
-  const [inputValue, setInputValue] = useState(value);
-  const [debouncedValue] = useDebounce(inputValue, 500);
-
-  useEffect(() => {
-    onChange(debouncedValue);
-  }, [debouncedValue, onChange]);
-
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+    onChange(e.target.value);
   };
 
   return (
@@ -28,7 +16,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ value, onChange }) => {
       className={css.input}
       type="text"
       placeholder="Search notes"
-      value={inputValue}
+      value={value}
       onChange={handleChange}
       aria-label="Search notes"
     />

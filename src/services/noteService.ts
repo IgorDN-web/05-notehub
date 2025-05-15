@@ -1,18 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
 import { Note } from '../types/note';
 
-// Base API URL
 const API_URL = 'https://notehub-public.goit.study/api/notes';
-
-// Проверяем, есть ли токен
 const token = import.meta.env.VITE_NOTEHUB_TOKEN;
 
-// Создаем экземпляр axios
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-});
+const axiosInstance = axios.create({ baseURL: API_URL });
 
-// Добавляем токен в заголовок только если он существует
 axiosInstance.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -34,7 +27,6 @@ interface FetchNotesResponse {
   totalNotes: number;
 }
 
-// Запрос на получение заметок
 export const fetchNotes = async ({
   page = 1,
   perPage = 12,
@@ -47,7 +39,6 @@ export const fetchNotes = async ({
   return data;
 };
 
-// Запрос на создание заметки
 interface CreateNotePayload {
   title: string;
   content?: string;
@@ -59,8 +50,7 @@ export const createNote = async (note: CreateNotePayload): Promise<Note> => {
   return data;
 };
 
-// Запрос на удаление заметки
-export const deleteNote = async (id: string): Promise<{ message: string }> => {
-  const { data }: AxiosResponse<{ message: string }> = await axiosInstance.delete(`/${id}`);
+export const deleteNote = async (id: number): Promise<Note> => {
+  const { data }: AxiosResponse<Note> = await axiosInstance.delete(`/${id}`);
   return data;
 };
