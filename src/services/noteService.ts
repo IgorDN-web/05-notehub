@@ -1,19 +1,25 @@
 import axios, { AxiosResponse } from 'axios';
 import { Note } from '../types/note';
 
+// Base API URL
 const API_URL = 'https://notehub-public.goit.study/api/notes';
 
+// Проверяем, есть ли токен
 const token = import.meta.env.VITE_NOTEHUB_TOKEN;
 
-if (!token) {
-  throw new Error('VITE_NOTEHUB_TOKEN is not defined');
-}
-
+// Создаем экземпляр axios
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
+});
+
+// Добавляем токен в заголовок только если он существует
+axiosInstance.interceptors.request.use((config) => {
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    console.error('VITE_NOTEHUB_TOKEN is not defined');
+  }
+  return config;
 });
 
 interface FetchNotesParams {
@@ -28,6 +34,7 @@ interface FetchNotesResponse {
   totalNotes: number;
 }
 
+// Запрос на получение заметок
 export const fetchNotes = async ({
   page = 1,
   perPage = 12,
@@ -40,6 +47,7 @@ export const fetchNotes = async ({
   return data;
 };
 
+// Запрос на создание заметки
 interface CreateNotePayload {
   title: string;
   content?: string;
@@ -51,6 +59,7 @@ export const createNote = async (note: CreateNotePayload): Promise<Note> => {
   return data;
 };
 
+// Запрос на удаление заметки
 export const deleteNote = async (id: string): Promise<{ message: string }> => {
   const { data }: AxiosResponse<{ message: string }> = await axiosInstance.delete(`/${id}`);
   return data;
